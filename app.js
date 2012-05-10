@@ -1,4 +1,6 @@
-var myapp = require("./myapp");
+var MyApp = require("./myapp");
+
+var myapp = new MyApp();
 
 // Example of what a function would look like that a route called
 var getPlayers = function(params, callback) {
@@ -11,9 +13,12 @@ var getPlayers = function(params, callback) {
 	});
 };
 
+
+
 // Test getPlayers
 getPlayers({}, function(err, data) {
 
+	console.log("original callback");
 	// Error found, do something with it
 	if (err) {
 		console.log(err);
