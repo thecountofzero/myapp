@@ -13,12 +13,20 @@ var getPlayers = function(params, callback) {
 	});
 };
 
+var getPlayer = function(params, callback) {
 
+	// Error found, do something with it
+	// Call the getPlayers function of the API
+	myapp.getPlayer(params, function(err, data) {
 
-// Test getPlayers
-getPlayers({}, function(err, data) {
+		// Execute callback that responds with return value
+		callback(err, data);
+	});
+};
 
-	console.log("original callback");
+getPlayer({id: "789"}, function(err, data) {
+
+	console.log("\r\nList Volumes ****************************");
 	// Error found, do something with it
 	if (err) {
 		console.log(err);
@@ -28,3 +36,18 @@ getPlayers({}, function(err, data) {
 		console.log(data);
 	}
 });
+
+// Test getPlayers
+getPlayers({}, function(err, data) {
+
+	console.log("\r\nList Clients ****************************");
+	// Error found, do something with it
+	if (err) {
+		console.log(err);
+	}
+	else {
+		// Send the data back to the browser
+		console.log(data);
+	}
+});
+

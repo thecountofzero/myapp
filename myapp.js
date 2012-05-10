@@ -20,7 +20,7 @@ function MyApp() {
 			// if complete, get the request id and match it up with the appropriate callback
 
 			var requestId = data.match(/<id>(\d+)<\/id>/),
-				completeFlag = data.match(/complete/);
+				completeFlag = data.match(/<complete>/);
 
 			if(completeFlag && requestId) {
 				self.activeRequests[requestId[1]](err, data);
@@ -36,7 +36,24 @@ MyApp.prototype.getRequestId = function() {
 MyApp.prototype.getPlayers = function(params, callback) {
 
 	var requestId = this.getRequestId(),
-		request = player.findAll(requestId, params, callback);
+		request;
+
+	callback = arguments[arguments.length - 1];
+	if (typeof(callback) !== 'function') callback = noop;
+
+	request = player.findAll(requestId, params, callback);
+
+	this.activeRequests[requestId] = request.responseHandler;
+
+	connection.addRequest(request.command);
+
+	return this;
+};
+
+MyApp.prototype.getPlayer = function(params, callback) {
+
+	var requestId = this.getRequestId(),
+		request = player.findOne(requestId, params, callback);
 
 	callback = arguments[arguments.length - 1];
 	if (typeof(callback) !== 'function') callback = noop;
