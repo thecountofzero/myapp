@@ -1,7 +1,23 @@
 var connection = require("./lib/connection"),
-	player = require("./lib/player");
+	volume = require("./lib/volume"),
+	client = require("./lib/client");
 
 var noop = function() {};
+
+// Helpers
+
+function doRequest(myapp, connection, requestObj) {
+	var requestId = myapp.getRequestId(),
+		request;
+
+	if (typeof(requestObj.callback) !== 'function') requestObj.callback = noop;
+
+	request = requestObj.command(requestId, requestObj.params, requestObj.callback);
+
+	myapp.activeRequests[requestId] = request.responseHandler;
+
+	connection.addRequest(request.command);
+}
 
 function MyApp() {
 
@@ -19,6 +35,8 @@ function MyApp() {
 			// look at the response. is it pending, error or complete?
 			// if complete, get the request id and match it up with the appropriate callback
 
+			data = data.replace(/<response><pending>.*<\/pending><\/response>/, "");
+
 			var requestId = data.match(/<id>(\d+)<\/id>/),
 				completeFlag = data.match(/<complete>/);
 
@@ -33,34 +51,24 @@ MyApp.prototype.getRequestId = function() {
 	return ++this.requestId;
 };
 
-MyApp.prototype.getPlayers = function(params, callback) {
+MyApp.prototype.getVolumes = function(params, callback) {
 
-	var requestId = this.getRequestId(),
-		request;
-
-	callback = arguments[arguments.length - 1];
-	if (typeof(callback) !== 'function') callback = noop;
-
-	request = player.findAll(requestId, params, callback);
-
-	this.activeRequests[requestId] = request.responseHandler;
-
-	connection.addRequest(request.command);
+	doRequest(this, connection, {
+		command: volume.findAll,
+		params: params,
+		callback: callback
+	});
 
 	return this;
 };
 
-MyApp.prototype.getPlayer = function(params, callback) {
+MyApp.prototype.getClients = function(params, callback) {
 
-	var requestId = this.getRequestId(),
-		request = player.findOne(requestId, params, callback);
-
-	callback = arguments[arguments.length - 1];
-	if (typeof(callback) !== 'function') callback = noop;
-
-	this.activeRequests[requestId] = request.responseHandler;
-
-	connection.addRequest(request.command);
+	doRequest(this, connection, {
+		command: client.findAll,
+		params: params,
+		callback: arguments[arguments.length - 1]
+	});
 
 	return this;
 };
